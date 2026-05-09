@@ -32,6 +32,13 @@ PageTree is currently a browser-based runtime prototype. It dynamically reads a 
 
 The planned next step is a Deno-based static build mode that reads the same content folder and writes real HTML pages into a `dist/` directory.
 
+## Related Projects
+
+PageTree uses two small companion projects:
+
+- [`parseMD`](https://github.com/Tehes/parseMD): A lightweight Markdown and frontmatter parser for browser and CDN usage.
+- [`vanillaTemplates`](https://github.com/Tehes/vanillaTemplates): A lightweight HTML-based template engine for rendering JSON data with valid HTML syntax.
+
 ## Features
 
 - **Dynamic Menu Generation**: Automatically generates a navigation menu based on files in a specified content directory.
