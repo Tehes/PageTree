@@ -1,140 +1,233 @@
 # PageTree
 
-## Overview
+PageTree turns a content folder into a navigable website.
 
-This is a **Single-Page Application (SPA)** designed to dynamically build a navigation menu based on the content of a specified directory. The app fetches files from either a local directory or a GitHub repository, processes them, and renders them in the browser. It also features a caching mechanism that can be toggled, but it is currently disabled during testing for better control over live changes.
+It currently runs as a client-side GitHub Pages app and is designed to grow into a small file-based site toolkit: the same content tree should be usable for browser rendering and, later, for static HTML output with Deno.
+
+## Core Idea
+
+GitHub Pages can host files. PageTree adds the missing structure around them:
+
+```text
+content/
+  01_home.html
+  02_about.md
+  imprint.md
+  _drafts/
+```
+
+From that folder, PageTree can build:
+
+- navigation links
+- clean route names
+- rendered page content
+- metadata from Markdown frontmatter
+- data-driven views from JSON files and templates
+
+The content folder becomes the source of truth for the site.
+
+## Current Status
+
+PageTree is currently a browser-based runtime prototype. It dynamically reads a configured content directory, builds a navigation menu and renders the selected content into the page without a full reload.
+
+The planned next step is a Deno-based static build mode that reads the same content folder and writes real HTML pages into a `dist/` directory.
 
 ## Features
 
-- **Dynamic Menu Generation**: Automatically generates a navigation menu based on files in a specified directory.
-- **GitHub Integration**: Supports fetching files directly from a GitHub repository using the GitHub API when hosted on GitHub Pages.
-- **Loadable HTML Templates**: HTML templates are fetched dynamically from the `/templates` directory based on the JSON data being rendered.
-- **Markdown Parsing**: Supports the display of Markdown content by converting it into HTML using the `parseMd` function.
-- **Frontmatter Extraction**: Extracts and processes YAML Frontmatter for Markdown files.
-- **Responsive Updates**: Automatically updates the page content when navigation links are clicked.
+- **Dynamic Menu Generation**: Automatically generates a navigation menu based on files in a specified content directory.
+- **GitHub Pages Integration**: Uses the GitHub API to fetch repository content when hosted on GitHub Pages.
+- **Local Directory Mode**: Can read a directory listing when served from a local or non-GitHub server that exposes indexes.
+- **Markdown Parsing**: Converts Markdown content into HTML using `parseMD`.
+- **Frontmatter Extraction**: Reads simple frontmatter from Markdown files for metadata such as title, date and author.
+- **Raw HTML Content**: Loads HTML files directly into the page body.
+- **JSON Templates**: Loads JSON data and renders it with external HTML templates using `vanillaTemplates`.
+- **Hash-Based Runtime Routing**: Uses clean hash routes such as `#home` while keeping content files in the `content/` directory.
+
+## Modes
+
+### Browser Runtime Mode
+
+This is the current mode.
+
+```text
+content/01_home.html
+→ menu item: Home
+→ route: #home
+→ loaded into <main>
+```
+
+When hosted on GitHub Pages, PageTree detects the repository from the current URL and uses the GitHub Contents API to list files in the configured content directory.
+
+### Planned Deno Static Build Mode
+
+The planned static mode should use the same content structure, but build real HTML files ahead of time:
+
+```text
+content/01_home.md
+→ dist/home/index.html
+```
+
+In this mode, the navigation can use real links instead of hash routes:
+
+```html
+<a href="/home/">Home</a>
+```
 
 ## How It Works
 
-PageTree operates in two main modes:
-1. **Local Filesystem Mode**: Fetches file listings directly from a local directory when running locally or on a non-GitHub server.
-2. **GitHub Pages Mode**: When hosted on GitHub Pages, the app uses the GitHub API to fetch files from a specific GitHub repository and directory.
+PageTree operates in two current runtime environments:
 
-### Template Loading
+1. **Local Directory Mode**: Fetches file listings from a local directory when running locally or on a non-GitHub server that exposes directory indexes.
+2. **GitHub Pages Mode**: Uses the GitHub Contents API to fetch files from a specific GitHub repository and directory.
 
-Instead of hard-coding HTML templates inside the main HTML file, templates are now stored in a separate `/templates` directory. When JSON data is loaded, the corresponding template is fetched and injected into the `<template>` tag dynamically.
+The app then:
+
+1. reads the available files,
+2. strips numeric prefixes from menu labels,
+3. builds navigation links,
+4. resolves the active hash route,
+5. fetches the matching content file,
+6. renders HTML, Markdown or JSON content into `<main>`.
 
 ## Installation and Setup
 
-1. **Clone the Repository**:
+1. **Clone the repository**:
+
    ```bash
-   git clone https://github.com/your-username/PageTree.git
+   git clone https://github.com/Tehes/PageTree.git
    cd PageTree
    ```
 
-2. **Directory Structure**:
-   Ensure that the `content/` and `templates/` directories are filled with the necessary files. File names in the `content/` directory can be prefixed with numbers to define their order in the menu, but these prefixes will not appear in the menu links.
+2. **Create your content structure**:
 
-3. **Run Locally**:
-   You can run the app locally by opening the `index.html` file in your browser or serving it with a simple HTTP server:
+   ```text
+   content/
+     01_home.html
+     02_about.md
+     04_products.json
+   templates/
+     products.html
+   ```
+
+   File names in the `content/` directory can be prefixed with numbers to define their order in the menu. These prefixes are not shown in the rendered navigation.
+
+3. **Run locally**:
+
+   Use a local static server. For example:
+
    ```bash
    npx serve
    ```
 
 4. **Deploy on GitHub Pages**:
-   - To host the app on GitHub Pages, push the project to a GitHub repository and enable GitHub Pages in the repository settings.
-   - The app will automatically detect if it is running on GitHub Pages and will fetch files using the GitHub API.
+
+   Push the project to GitHub and enable GitHub Pages in the repository settings. PageTree will detect GitHub Pages automatically and use the GitHub API to list the content files.
 
 ## Configuration
 
-The configuration is stored in the `config` object within `app.js`. You can modify it to fit your needs:
+The configuration is stored in the `config` object within `app.js`:
 
 ```javascript
 const config = {
-    startingPageName: "home",             // The default page to load
-    standardFileType: "html",             // Default file type if not specified
-    directory: "content",                 // Directory containing content
-    user: window.location.hostname.split(".")[0],  // GitHub username (autodetected)
-    repo: window.location.pathname.split("/")[1],  // GitHub repository name (autodetected)
-    isGitHubPages: window.location.hostname.endsWith("github.io")  // Detect GitHub Pages environment
+    startingPageName: "home",
+    standardFileType: "html",
+    directory: "content",
+    user: globalThis.location.hostname.split(".")[0],
+    repo: globalThis.location.pathname.split("/")[1],
+    isGitHubPages: globalThis.location.hostname.endsWith("github.io")
 };
 ```
 
-### Customization
+### Options
 
-- **Changing the Content Directory**: You can modify the `directory` in the config object to point to a different directory for fetching content.
-- **Markdown Parsing**: If you're using Markdown files, ensure that `parseMd` is correctly imported and used to process the content.
-- **Adding File Types**: The app currently supports Markdown, plain text, and JSON files. You can easily extend it to support more file types by modifying the `router()` function.
+- **`startingPageName`**: The default route to load when no hash is present.
+- **`standardFileType`**: The default file type used when no `data-file-type` is set on a navigation link.
+- **`directory`**: The content directory to read.
+- **`user`**: GitHub username, auto-detected on GitHub Pages.
+- **`repo`**: GitHub repository name, auto-detected from the URL path.
+- **`isGitHubPages`**: Detects whether the app is currently running on GitHub Pages.
 
-## Usage Example
+## Content Files
 
-Once the app is up and running, it will dynamically generate the navigation menu based on the contents of the `content/` directory. Clicking on a link in the menu will load the corresponding file's content into the page without a full page reload.
+### HTML
 
-### Adding Templates for JSON Files
+HTML files are inserted directly into `<main>`:
 
-The app also supports rendering templates for JSON data. Templates are defined within the HTML using the `<template>` tag, and the `renderTemplate` function dynamically fills them based on the structure of your JSON file.
+```text
+content/01_home.html
+```
+
+### Markdown
+
+Markdown files are parsed with `parseMD`. The rendered HTML is inserted into `<main>`, while frontmatter can be used as metadata.
+
+```md
+---
+title: About
+date: 2024-08-24
+author: Tino
+---
+
+# About
+
+This is a Markdown page.
+```
+
+### JSON
+
+JSON files are rendered with an external template from the `templates/` directory.
+
+For example:
+
+```text
+content/04_products.json
+templates/products.html
+```
+
+When the JSON file is loaded, PageTree fetches the matching template and renders it with `vanillaTemplates`.
+
+## JSON Template Example
 
 ```json
 {
-  "name": {
-    "first": "Max",
-    "last": "Mustermann"
-  },
-  "age": "44",
-  "friends": [
+  "products": [
     {
-      "name": "Nils",
-      "age": 20
+      "Name": "Cheese",
+      "Price": 2.5,
+      "Location": "Refrigerated foods"
     },
     {
-      "name": "Teddy",
-      "age": 10
-    },
-    {
-      "name": "Nelson",
-      "age": 40
+      "Name": "Chocolate",
+      "Price": 1.5,
+      "Location": "the Snack isle"
     }
-  ],
-  "hobbies": [
-    "singing",
-    "dancing",
-    "reading",
-    "cycling"
-  ],
-  "profilePic": "https://www.fillmurray.com/300/300",
-  "facebook": "https://de.wikipedia.org/wiki/Bill_Murray"
+  ]
 }
 ```
 
-### Corresponding HTML Template
-
-The following HTML template will render the JSON data:
+A matching template could look like this:
 
 ```html
-<template id="persons">
-  <p>Name: <var>name.first</var> <var>name.last</var></p>
-  <p>Age: <var>age</var></p>
-  <p>Friends:
-    <var data-loop="friends">
-      <var>name</var> (<var>age</var>),
-    </var>
-  </p>
-  <p>Hobbies:
-    <ol>
-      <var data-loop="hobbies">
-        <li><var></var></li>
-      </var>
-    </ol>
-  </p>
-  <img src="" data-attr="src:profilePic" alt="Profile Picture">
-  <a href="" data-attr="href:facebook">Wiki: <var>name.first</var> <var>name.last</var></a>
-</template>
+<ul>
+  <var data-loop="products">
+    <li>
+      <strong><var>Name</var></strong>
+      <span><var>Price</var></span>
+      <small><var>Location</var></small>
+    </li>
+  </var>
+</ul>
 ```
 
-### Usage
+## Roadmap
 
-When the app loads a JSON file (like `persons.json`), it automatically applies the corresponding template and renders the content into the web page. This system is flexible and works with different types of JSON data.
-
-For example, with the `persons.json` structure mentioned above, the app will fetch the JSON file, load the appropriate template (`#persons`), and dynamically inject the data into the template tags using the `renderTemplate` function.
-
-This allows for flexible content generation without needing to write raw HTML for each data entry, making it easy to manage and display various types of content.
-```
+- Rename `.txt` Markdown examples to `.md`.
+- Split `app.js` into smaller modules.
+- Add Kirby-inspired listed/unlisted behavior:
+  - numbered files appear in navigation,
+  - unnumbered files are routable but not listed,
+  - `_drafts/` is ignored.
+- Add cleaner metadata handling from frontmatter.
+- Add Deno-based static build output to `dist/`.
+- Add GitHub Actions deployment for the static build mode.
+- Consider extracting the menu builder into a standalone module once the API is stable.
