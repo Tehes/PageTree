@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------------------------------------------
 Imports
 ---------------------------------------------------------------------------------------------------*/
-import { parseMd } from "../libs/parseMD/parseMD.js";
-import { renderTemplate } from "../libs/vanillaTemplates/js/renderTemplate.js";
+import { parseMd } from "https://cdn.jsdelivr.net/gh/Tehes/parseMD@main/parseMD.js";
+import { renderTemplate } from "https://cdn.jsdelivr.net/gh/Tehes/vanillaTemplates@v0.18.1/core/renderTemplate.js";
 
 /* --------------------------------------------------------------------------------------------------
 Configuration
@@ -11,9 +11,9 @@ const config = {
     startingPageName: "home",
     standardFileType: "html",
     directory: "content",
-    user: window.location.hostname.split(".")[0],
-    repo: window.location.pathname.split("/")[1],
-    isGitHubPages: window.location.hostname.endsWith("github.io")
+    user: globalThis.location.hostname.split(".")[0],
+    repo: globalThis.location.pathname.split("/")[1],
+    isGitHubPages: globalThis.location.hostname.endsWith("github.io")
 };
 
 /* --------------------------------------------------------------------------------------------------
@@ -166,16 +166,16 @@ function checkFileType(ev) {
 }
 
 function init() {
-    window.addEventListener("hashchange", router, false);
-    window.addEventListener("DOMContentLoaded", buildMenu, false);
+    globalThis.addEventListener("hashchange", router, false);
+    globalThis.addEventListener("DOMContentLoaded", buildMenu, false);
     document.addEventListener("click", checkFileType, false);
 }
 
-window.app = {
+globalThis.app = {
     init
 };
 
-window.app.init();
+globalThis.app.init();
 
 /* --------------------------------------------------------------------------------------------------
 Service Worker configuration. Toggle 'useServiceWorker' to enable or disable the Service Worker.
@@ -184,7 +184,7 @@ const useServiceWorker = false; // Set to "true" if you want to register the Ser
 
 async function registerServiceWorker() {
     try {
-        const currentPath = window.location.pathname;
+        const currentPath = globalThis.location.pathname;
         const registration = await navigator.serviceWorker.register(`${currentPath}service-worker.js`);
         console.log("Service Worker registered with scope:", registration.scope);
     } catch (error) {
@@ -203,7 +203,7 @@ async function unregisterServiceWorkers() {
 }
 
 if ("serviceWorker" in navigator) {
-    window.addEventListener("load", async () => {
+    globalThis.addEventListener("load", async () => {
         if (useServiceWorker) {
             await registerServiceWorker();
         } else {
