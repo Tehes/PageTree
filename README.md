@@ -1,4 +1,4 @@
-# Single-Page-App
+# PageTree
 
 ## Overview
 
@@ -15,7 +15,7 @@ This is a **Single-Page Application (SPA)** designed to dynamically build a navi
 
 ## How It Works
 
-The Single-Page-App operates in two main modes:
+PageTree operates in two main modes:
 1. **Local Filesystem Mode**: Fetches file listings directly from a local directory when running locally or on a non-GitHub server.
 2. **GitHub Pages Mode**: When hosted on GitHub Pages, the app uses the GitHub API to fetch files from a specific GitHub repository and directory.
 
@@ -27,8 +27,8 @@ Instead of hard-coding HTML templates inside the main HTML file, templates are n
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/Single-Page-App.git
-   cd Single-Page-App
+   git clone https://github.com/your-username/PageTree.git
+   cd PageTree
    ```
 
 2. **Directory Structure**:
