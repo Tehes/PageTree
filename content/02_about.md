@@ -1,7 +1,7 @@
 ---
-title: Mein Blogpost
-date: 2024-08-24
-author: Tino
+title: Markdown Example
+date: 2026-05-09
+author: Tehes
 ---
 
 Is this an alternative h1?

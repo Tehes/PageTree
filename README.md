@@ -25,12 +25,11 @@ Implemented:
 - hash-based routing,
 - direct HTML loading,
 - JSON rendering with external templates,
-- Markdown parsing through `parseMD` for the current text-based Markdown example,
+- Markdown parsing through `parseMD` for `.md` content files,
 - CDN imports for `parseMD` and `vanillaTemplates`.
 
 Planned:
 
-- first-class `.md` support instead of the current `.txt` Markdown example,
 - Kirby-inspired listed/unlisted/draft behavior,
 - cleaner metadata handling from frontmatter,
 - modularization of `app.js`,
@@ -157,9 +156,9 @@ content/01_home.html
 
 ### Markdown
 
-Partly current, partly planned.
+Current.
 
-The current prototype parses the existing text-based Markdown example with `parseMD`. First-class `.md` routing is planned next.
+Markdown files are parsed with `parseMD` and inserted into `<main>` as rendered HTML.
 
 ```md
 ---
@@ -313,8 +312,6 @@ The Deno static builder could reuse its pure parsing functions, but not its brow
 
 ### Runtime Cleanup
 
-- Rename `.txt` Markdown examples to `.md`.
-- Add first-class `.md` routing.
 - Use frontmatter metadata for `document.title` and route metadata.
 - Split `app.js` into smaller modules.
 
