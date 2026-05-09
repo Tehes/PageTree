@@ -185,6 +185,16 @@ content/04_products.json
 templates/products.html
 ```
 
+Template matching is convention-based:
+
+```text
+content/04_products.json → templates/products.html
+content/05_persons.json  → templates/persons.html
+content/06_user.json     → templates/user.html
+```
+
+PageTree removes the numeric prefix and file extension to derive the template name.
+
 When the JSON file is loaded, PageTree fetches the matching template and renders it with `vanillaTemplates`.
 
 Example data:
