@@ -1,4 +1,4 @@
-# agents.md
+# AGENTS.md
 
 This file defines **how AI agents must work in this repository**.\
 It is binding. When in doubt, choose the most conservative option and change less, not more.
@@ -61,6 +61,9 @@ It is binding. When in doubt, choose the most conservative option and change les
   - Do not refactor between `function` and arrows without a clear reason.
   - Arrow functions are the preferred form for event listener callbacks, unless the handler is
     reused or grows significantly.
+  - Avoid tiny one-off helper functions. Extract functions only for reuse, real complexity,
+    meaningful domain concepts, side-effect isolation, or clear readability gains.
+    Keep simple one-off conditions inline.
 - **Comments**
   - English only
   - Use sparingly and intentionally
@@ -249,9 +252,11 @@ Accessibility should be **pragmatic, not performative**.
   - Keep event name and payload shape consistent with existing calls
 - Keep `umami.track` calls consistent with existing usage.
 - Defensive usage only:
+
   ```js
   globalThis.umami?.track("EventName", { ... });
   ```
+
 - Do not add analytics unless the project already uses them.
 
 ---
@@ -301,6 +306,33 @@ When making changes, always provide:
 - If a reproducible scenario exists: describe it.
 - If no test setup exists: provide a short manual checklist (max 5 items).
 - Never claim tests were run if they were not.
+
+### Browser Testing
+
+- For changes affecting UI or browser behavior, test the affected flow
+  in an available browser when possible.
+- Use the project's local static server. Reuse a running server when available.
+- Check the affected interactions and visible result.
+- For layout changes, check desktop and mobile viewport sizes.
+- Check browser console errors when the available tools support it.
+- Do not install dependencies or add test tooling for browser checks.
+- Report what was tested and any limitations. If browser testing is unavailable,
+  provide a manual checklist instead.
+
+### Browser Tool Priority
+
+- Respect an explicitly requested browser or tool.
+- Prefer Chrome MCP for routine browser testing and debugging.
+- Use Safari MCP for relevant compatibility checks.
+  For Safari-specific issues, start with Safari MCP.
+- Use browser control when the MCP tools are unavailable or cannot
+  perform the required interaction.
+- Use computer control when browser-level tools cannot reach the
+  required interface or interaction.
+- Do not repeat equivalent checks through every tool.
+- Report which browser and tool were used.
+- Mobile viewport checks and desktop Safari tests do not replace
+  testing on an actual iOS device.
 
 ---
 
